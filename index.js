@@ -49,30 +49,20 @@ client.connect(err => {
       const title = req.body.title;
       const price = req.body.price;
       const description = req.body.description;
-      const filePath = `${__dirname}/services/${file.name}`
       
-      
-      file.mv(filePath, err => {
-        if(err) {
-          console.log(err);
-          return res.status(500).send({msg: "failed to upload image"})
-        }
-        const newImg = fs.readFileSync(filePath);
-        const encImg = newImg.toString('base64');
+     
+      const newImg = file.data;
+      const encImg = newImg.toString('base64');
 
-        var image = {
-          contentType:req.files.file.mimetype,
-          size: req.files.file.size,
-          img: Buffer(encImg, 'base64')
-        };
+      var image = {
+        contentType: file.mimetype,
+        size: file.size,
+        img: Buffer.from(encImg, 'base64')
+      };
 
-        serviceCollection.insertOne({title, description, price, image})
-        .then(result => {
-          fs.remove(filePath, error => {
-            if(error) {console.log(error)};
-            res.send(result.insertedCount > 0);
-          }) 
-        })
+      serviceCollection.insertOne({title, description, price, image})
+      .then(result => {
+          res.send(result.insertedCount > 0);
       })
     })
 });
